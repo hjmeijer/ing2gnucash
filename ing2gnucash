@@ -1,0 +1,24 @@
+#!/usr/bin/python
+
+import argparse
+import csv
+
+def convert(line):
+    fields =  ['date', 'descr1', '_', '_', '_', 'direction', 'amount', 'type', 'descr2']
+    tr      = dict(zip(fields, [' '.join(x.strip().split()) for x in line]))
+    descr   = '%s - %s: %s' % (tr['descr1'], tr['type'], tr['descr2'])
+    amount  = tr['amount'].replace(',', '.')                      
+    deposit = amount if tr['direction'] == 'Bij' else ''
+    withdrw = '' if tr['direction'] == 'Bij' else amount
+    
+    return '"%s", "%s", "%s", "%s"' % (tr['date'], deposit, withdrw, descr)
+
+def main():
+    desc = """Convert ING CSV export to GNUCash importable format"""
+    parser = argparse.ArgumentParser(description=desc)
+    parser.add_argument('file', type=file, help='file to convert')
+    args = parser.parse_args()
+    for line in list(csv.reader(args.file.readlines()))[1:]:
+        print convert(line)
+
+main()
